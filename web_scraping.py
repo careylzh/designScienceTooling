@@ -46,24 +46,24 @@ def write_to_csv(messages, filename):
             timestamp = convert_timestamp(msg['timestamp'])
             writer.writerow([msg['sender_full_name'], timestamp, msg['content']])  # Write each message
 
-# Read channel names from the CSV file
+# Read channel names and categories from the CSV file
 def read_channels_from_csv(filename="clean_sorted_zulip_channels.csv"):
     channels = []
     with open(filename, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
         next(reader)  # Skip the header row
         for row in reader:
-            channels.append(row[1])  # Channel name is in the second column
+            channels.append((row[0], row[1]))  # Tuple of (category, channel name)
     return channels
 
 # Main function to fetch messages for all channels and save to separate CSV files
 def main():
     channels = read_channels_from_csv()
-    for channel in channels:
-        print(f"Fetching messages for channel: {channel}")
+    for category, channel in channels:
+        print(f"Fetching messages for channel: {channel} in category: {category}")
         messages = fetch_messages(channel)
         if messages:
-            filename = f"{channel.replace(' ', '_')}_messages.csv"
+            filename = f"{category.replace(' ', '_')}_{channel.replace(' ', '_')}_messages.csv"
             write_to_csv(messages, filename)
             print(f"Messages saved to {filename}")
         else:
